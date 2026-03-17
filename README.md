@@ -121,3 +121,4 @@ API is limited to 3 requests per IP per minute using Upstash Redis + `@upstash/r
   }
 }
 
+Expected: 200, 200, 200, 429
