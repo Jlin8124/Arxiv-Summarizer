@@ -102,3 +102,22 @@ paper-lens/
 ├── vercel.json
 └── .env.example
 ```
+
+## Rate Limiting
+
+API is limited to 3 requests per IP per minute using Upstash Redis + `@upstash/ratelimit` (sliding window).
+
+**To test locally:**
+1. Run `vercel dev`
+2. In a new terminal, run:
+```powershell
+1..4 | ForEach-Object {
+  $i = $_
+  try {
+    $r = Invoke-WebRequest -Uri http://localhost:3000/api/summarize -Method POST -ContentType "application/json" -Body '{"mode":"url","url":"https://arxiv.org/abs/2301.12345","formatPrompt":"test"}'
+    "Request $i : $($r.StatusCode)"
+  } catch {
+    "Request $i : $($_.Exception.Response.StatusCode.value__)"
+  }
+}
+
