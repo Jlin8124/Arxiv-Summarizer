@@ -64,6 +64,9 @@ export default async function handler(req, res) {
       }
     } else if (mode === "upload") {
       if (!pdfBase64) return res.status(400).json({ error: "Missing PDF data." });
+      if (pdfBase64.length > 20_000_000) {
+        return res.status(400).json({ error: "File too large. Max 15MB." });
+      }
 
       parts = [
         {
