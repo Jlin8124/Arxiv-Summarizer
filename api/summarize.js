@@ -1,6 +1,22 @@
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(3, "1 m"),
+});
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket.remoteAddress || "unknown";
+  const { success } = await ratelimit.limit(ip);
+  console.log("IP detected:", ip);
+  console.log("Rate limit result:", success);
+  if (!success) {
+    return res.status(429).json({ error: "Too many requests. Please wait a minute and try again." });
   }
 
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
